@@ -1,0 +1,154 @@
+<title>ארוגם — חלון הסוול</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Heebo:wght@500;800;900&family=Assistant:wght@400;600&family=JetBrains+Mono:wght@400;700&display=swap">
+<style>
+:root{--ink:#0B1620;--surf:#121F2B;--surf2:#162836;--line:#1E3040;--line2:#2A4258;
+ --tx:#C9D8E2;--tx2:#8AA1B1;--tx3:#5E7484;--acc:#4FD1C5;--acc-d:#2E9E95;--sand:#F2A65A;--dim:#42566A}
+@media(prefers-color-scheme:light){:root:not([data-theme="dark"]){
+ --ink:#F2F5F7;--surf:#FFF;--surf2:#EAF0F3;--line:#D3DEE5;--line2:#B9C9D3;
+ --tx:#12222E;--tx2:#4A6173;--tx3:#7C93A3;--acc:#12857C;--acc-d:#0C635C;--sand:#B26A18;--dim:#9BAEBB}}
+:root[data-theme="light"]{--ink:#F2F5F7;--surf:#FFF;--surf2:#EAF0F3;--line:#D3DEE5;--line2:#B9C9D3;
+ --tx:#12222E;--tx2:#4A6173;--tx3:#7C93A3;--acc:#12857C;--acc-d:#0C635C;--sand:#B26A18;--dim:#9BAEBB}
+*{box-sizing:border-box}
+body{margin:0;background:var(--ink);color:var(--tx);font-family:Assistant,ui-sans-serif,system-ui,sans-serif;
+ font-size:16px;line-height:1.65;-webkit-font-smoothing:antialiased}
+.wrap{max-width:840px;margin:0 auto;padding:0 18px 80px;direction:rtl}
+h1,h2,h3{font-family:Heebo,ui-sans-serif,system-ui,sans-serif;text-wrap:balance;margin:0}
+code{font-family:"JetBrains Mono",ui-monospace,monospace;font-variant-numeric:tabular-nums}
+header{padding:52px 0 26px;border-bottom:1px solid var(--line)}
+.eyebrow{font-family:"JetBrains Mono",monospace;font-size:11px;letter-spacing:.14em;color:var(--acc);margin:0 0 14px;direction:ltr;text-align:right}
+h1{font-size:clamp(34px,7vw,58px);font-weight:900;letter-spacing:-.02em;line-height:1}
+h1 span{display:block;color:var(--tx3);font-weight:500;font-size:.44em;margin-top:10px}
+.lede{margin:16px 0 0;max-width:56ch;color:var(--tx2)}
+.coords{display:flex;flex-wrap:wrap;gap:6px 18px;margin-top:20px;font-family:"JetBrains Mono",monospace;
+ font-size:11.5px;color:var(--tx3);direction:ltr;justify-content:flex-end}
+section{padding:44px 0 0}
+h2{font-size:clamp(21px,3.2vw,27px);font-weight:800;letter-spacing:-.01em}
+.sub{color:var(--tx2);margin:10px 0 0;max-width:58ch;font-size:15px}
+.rule{display:flex;align-items:center;gap:12px;margin-bottom:6px}
+.rule::after{content:"";flex:1;height:1px;background:var(--line)}
+.tag{font-family:"JetBrains Mono",monospace;font-size:10.5px;letter-spacing:.12em;color:var(--tx3);direction:ltr}
+.stamp{font-family:"JetBrains Mono",monospace;font-size:11px;color:var(--tx3);margin:14px 0 0;direction:ltr;text-align:right}
+.days{display:flex;flex-direction:column;gap:4px;margin-top:20px}
+.day{display:grid;grid-template-columns:64px 1fr 56px 50px 46px 56px 66px;align-items:center;gap:9px;
+ width:100%;text-align:right;cursor:pointer;background:var(--surf);border:1px solid var(--line);
+ border-right:3px solid var(--dim);border-radius:3px;padding:10px 12px;color:inherit;font:inherit;
+ transition:background .15s,border-color .15s}
+.day:hover{background:var(--surf2)}
+.day:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+.day.go{border-right-color:var(--sand)}.day.ok{border-right-color:var(--acc)}
+.day.fade{border-right-color:var(--tx3)}.day.flat{border-right-color:var(--dim)}
+.day[aria-expanded="true"]{background:var(--surf2);border-color:var(--line2)}
+.d-when{display:flex;flex-direction:column;line-height:1.15}
+.d-when b{font-family:Heebo;font-size:15px;font-weight:800}
+.d-when i{font-style:normal;font-size:10.5px;color:var(--tx3);font-family:"JetBrains Mono",monospace}
+.d-bar{height:6px;background:var(--line);border-radius:99px;overflow:hidden}
+.d-fill{display:block;height:100%;width:var(--p);border-radius:99px;background:var(--dim)}
+.go .d-fill{background:linear-gradient(90deg,var(--sand),var(--acc-d))}
+.ok .d-fill{background:var(--acc)}.fade .d-fill{background:var(--tx3)}
+.d-num{font-family:"JetBrains Mono",monospace;text-align:left;white-space:nowrap}
+.d-num b{font-size:13.5px;font-weight:700}
+.d-num i{font-style:normal;font-size:10px;color:var(--tx3);margin-left:1px}
+.d-num.per b{color:var(--acc)}
+.d-wind{font-family:"JetBrains Mono",monospace;font-size:11px;color:var(--tx3);text-align:left}
+.d-wind.off{color:var(--acc)}
+.d-chip{font-family:Heebo;font-size:11px;font-weight:800;text-align:center;padding:3px 0;
+ border-radius:2px;border:1px solid var(--line2);color:var(--tx3)}
+.go .d-chip{border-color:var(--sand);color:var(--sand)}
+.ok .d-chip{border-color:var(--acc-d);color:var(--acc)}
+.d-meta{grid-column:1/-1;display:none;gap:5px 16px;flex-wrap:wrap;padding:9px 0 1px;margin-top:7px;
+ border-top:1px dashed var(--line2);justify-content:flex-end}
+.day[aria-expanded="true"] .d-meta{display:flex}
+.cmp{font-family:"JetBrains Mono",monospace;font-size:11px;color:var(--tx3)}
+.cmp.solo{color:var(--sand)}
+@media(max-width:700px){.day{grid-template-columns:56px 1fr 50px 44px;row-gap:5px}
+ .day .d-num:nth-of-type(3),.d-wind{grid-row:2;justify-self:end}
+ .d-chip{grid-row:2;grid-column:4}}
+.frame{margin:22px 0 0;background:var(--surf);border:1px solid var(--line);border-radius:4px;overflow:hidden}
+.f-head{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:8px;
+ padding:13px 15px;border-bottom:1px solid var(--line)}
+.f-head h3{font-size:16px;font-weight:800}
+.f-head code{font-size:11.5px;color:var(--acc)}
+.frame img{display:block;width:100%;height:auto;background:var(--ink)}
+.frame figcaption{padding:12px 15px;color:var(--tx2);font-size:14px;border-top:1px solid var(--line)}
+ol.stages{list-style:none;margin:20px 0 0;padding:0}
+.stage{display:grid;grid-template-columns:34px 1fr;gap:14px;padding:16px 0;border-top:1px solid var(--line)}
+.s-n{font-family:"JetBrains Mono",monospace;font-size:12px;color:var(--acc);padding-top:4px;direction:ltr}
+.s-b h3{font-size:16px;font-weight:800}
+.s-b p{margin:6px 0 0;color:var(--tx2);max-width:56ch;font-size:15px}
+.s-b code{font-size:12px;color:var(--tx3);direction:ltr;display:inline-block}
+.limit{border-right:2px solid var(--sand);padding-right:15px;margin-top:16px}
+.limit h3{font-size:14.5px;font-weight:800}
+.limit p{margin:4px 0 0;color:var(--tx2);max-width:58ch;font-size:14.5px}
+footer{margin-top:52px;padding-top:20px;border-top:1px solid var(--line);font-family:"JetBrains Mono",monospace;
+ font-size:10.5px;color:var(--tx3);display:flex;flex-wrap:wrap;gap:5px 16px;direction:ltr;justify-content:flex-end}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<div class="wrap">
+<header>
+<p class="eyebrow">SENTINEL-2 × WAVEWATCH III</p>
+<h1>חלון הסוול<span>ארוגם ביי</span></h1>
+<p class="lede">התחזית אומרת לך שסוול מגיע. היא לא אומרת איך הוא נראה כשהוא נחת על החוף הזה. כאן יש לכל תחזית פריים לוויין אמיתי של יום דומה.</p>
+<div class="coords"><span>6.8395°N 81.8365°E</span><span>overpass 10:36 LKT</span><span>363 scenes 2022–26</span><span>31 clear frames</span></div>
+</header>
+
+<section>
+<div class="rule"><span class="tag">THE WINDOW</span></div>
+<h2>מתי ללכת</h2>
+<p class="sub">ממוצע בוקר 06:00–10:00. אורך הפס הוא האחוזון מול ארבע שנים בחוף הזה, לא גודל מוחלט. לחיצה על יום פותחת את ההצלבה בין המודלים ואת הפריים התואם.</p>
+<!--FORECAST:START-->
+{{STAMP}}
+{{ROWS}}
+<!--FORECAST:END-->
+</section>
+
+<section>
+<div class="rule"><span class="tag">FRAMES</span></div>
+<h2>איך זה נראה</h2>
+<p class="sub">סנטינל-2, צבע טבעי, 10 מטר לפיקסל. כל החוף מוויסקי פוינט עד אוקנדה ברצועה אחת — 17.7 × 37.6 ק״מ. תזום לאן שתרצה. שום דבר כאן לא פורש עבורך.</p>
+<figure class="frame" id="f20260831">
+<div class="f-head"><h3>31.8.2026</h3><code dir="ltr">1.48m @ 17.1s · 207°</code></div>
+<img src="img/20260831.jpg" alt="Sentinel-2, ארוגם ביי, 31.8.2026" loading="lazy">
+<figcaption>אנלוג ל-11–13.9. מחזור ארוך מדרום-מערב, ובנקי החול הנוכחיים.</figcaption></figure><figure class="frame" id="f20260819">
+<div class="f-head"><h3>19.8.2026</h3><code dir="ltr">2.26m @ 12.8s · 182°</code></div>
+<img src="img/20260819.jpg" alt="Sentinel-2, ארוגם ביי, 19.8.2026" loading="lazy">
+<figcaption>הפריים הגדול והנקי בארכיון. אחוזון 99.6, 0.4% עננות.</figcaption></figure><figure class="frame" id="f20240809">
+<div class="f-head"><h3>9.8.2024</h3><code dir="ltr">1.54m @ 15.7s · 201°</code></div>
+<img src="img/20240809.jpg" alt="Sentinel-2, ארוגם ביי, 9.8.2024" loading="lazy">
+<figcaption>ההתאמה ההדוקה ביותר לשבת 12.9 (מרחק 1.14).</figcaption></figure>
+</section>
+
+<section>
+<div class="rule"><span class="tag">METHOD</span></div>
+<h2>שישה שלבים</h2>
+<p class="sub">כל המקורות חינמיים וללא מפתח. הצינור כולו הוא בקשות HTTP ואריתמטיקה — אין מודל לאמן ואין שיפוט להצפין.</p>
+<ol class="stages"><li class="stage"><div class="s-n">1</div><div class="s-b"><h3>דגימה במעלה הזרם</h3><p>סוול נמדד במים עמוקים לפני שהחוף מעקם אותו — 5.2°N 81.0°E, דרומית לסרי לנקה. הנקודה המקומית כבר מוצלת ומדווחת נמוך מדי.</p></div></li><li class="stage"><div class="s-n">2</div><div class="s-b"><h3>קטלוג מעברים</h3><p>כל מעבר של סנטינל-2 עם שעה, זווית שמש ועננות. ארוגם: 10:36 מקומי, כל 4–5 ימים — בדיוק שעת הרוח האופ-שור.</p></div></li><li class="stage"><div class="s-n">3</div><div class="s-b"><h3>זריקת נתון העננות</h3><p><code>eo:cloud_cover</code> מכסה 110 ק״מ שרובם הרים. חישוב מחדש מבנד SCL מעל רצועת החוף בלבד. הפער מגיע ל-28 נקודות אחוז.</p></div></li><li class="stage"><div class="s-n">4</div><div class="s-b"><h3>ספריית פריימים</h3><p>מה ששורד הוא הנכס: פריימים נקיים, כל אחד מתויג בסוול שרץ מתחתיו. 31 לארוגם. מחושב פעם אחת.</p></div></li><li class="stage"><div class="s-n">5</div><div class="s-b"><h3>התאמה</h3><p>מרחק משוקלל על שישה פרמטרים — גובה, מחזור וכיוון, במעלה הזרם ומקומית. השכן הקרוב מנצח. אריתמטיקה, לא שיפוט.</p></div></li><li class="stage"><div class="s-n">6</div><div class="s-b"><h3>מודל אחד בשני הצדדים</h3><p>הספרייה והתחזית חייבות לבוא מאותו מודל. ECMWF ו-WW3 תיארו את אותו בוקר כ-11.95 שניות ו-15.15 שניות. הצלבה מחזירה תשובה שגויה בביטחון מלא.</p></div></li></ol>
+</section>
+
+<section>
+<div class="rule"><span class="tag">LIMITS</span></div>
+<h2>מה זה לא יודע</h2>
+<div class="limit"><h3>לא שופט גלים</h3><p>שום מודל כאן לא מחליט אם ברייק טוב. הוא מוצא לך תצלום אמיתי של יום דומה ועוצר. הקריאה שלך.</p></div>
+<div class="limit"><h3>מעבר ליום 10 — מודל אחד בלי דעה שנייה</h3><p>רק WW3 מגיע ל-16 יום. ECMWF עדיף ב-3–7 ימים. שורה שמסומנת «WW3 בלבד» לא הוצלבה.</p></div>
+<div class="limit"><h3>גובה בטווח ארוך הוא החלק הרעוע</h3><p>בגראונדסוול רחוק המחזור והכיוון כמעט דטרמיניסטיים — הסערה כבר קרתה. הגובה זז. קח שורה רחוקה כאופי, לא כגודל.</p></div>
+</section>
+
+<footer><span>Sentinel-2 L2A · ESA/Copernicus</span><span>sentinel-cogs · AWS Open Data</span><span>Open-Meteo Marine</span><span>Element84 STAC</span></footer>
+</div>
+
+<script type="application/json" id="reclib">{"pctBreaks": [0.8026, 1.8832, 2.1625, 2.4336, 2.6375, 2.8875, 3.0902, 3.264, 3.4313, 3.584, 3.7069, 3.873, 4.0032, 4.1574, 4.2861, 4.3996, 4.5315, 4.6694, 4.8138, 4.9619, 5.0927, 5.2272, 5.3638, 5.4743, 5.6027, 5.7542, 5.9015, 6.051, 6.174, 6.2874, 6.421, 6.5558, 6.688, 6.8171, 6.9522, 7.0858, 7.22, 7.3628, 7.4973, 7.6532, 7.7976, 7.9376, 8.128, 8.262, 8.4326, 8.608, 8.7506, 8.91, 9.0569, 9.1935, 9.3527, 9.504, 9.6826, 9.8838, 10.0845, 10.25, 10.4374, 10.6502, 10.831, 11.0352, 11.2288, 11.4264, 11.6272, 11.8844, 12.0612, 12.2815, 12.5145, 12.7721, 12.996, 13.225, 13.4659, 13.7251, 13.991, 14.256, 14.5475, 14.8382, 15.1855, 15.552, 15.9701, 16.344, 16.7, 17.1, 17.5446, 17.9626, 18.36, 18.7792, 19.3406, 19.944, 20.678, 21.3532, 22.1875, 23.1138, 24.336, 25.5832, 26.833, 28.5763, 30.3468, 32.9753, 36.675, 45.225, 105.9107], "frames": [{"d": "2024-07-25", "h": 1.2, "t": 9.3, "dr": 152, "lh": 1.02, "lt": 9.6, "ldr": 144, "c": 0.5, "az": 58}, {"d": "2024-08-04", "h": 1.02, "t": 12.5, "dr": 178, "lh": 0.92, "lt": 12.7, "ldr": 174, "c": 0.4, "az": 63}, {"d": "2024-08-09", "h": 1.54, "t": 15.7, "dr": 201, "lh": 1.12, "lt": 16.1, "ldr": 193, "c": 1.4, "az": 66}, {"d": "2024-09-28", "h": 1.08, "t": 6.8, "dr": 274, "lh": 0.58, "lt": 9.0, "ldr": 132, "c": 1.1, "az": 114}, {"d": "2024-10-18", "h": 1.44, "t": 13.5, "dr": 192, "lh": 1.36, "lt": 13.8, "ldr": 191, "c": 0.9, "az": 132}, {"d": "2024-11-17", "h": 0.64, "t": 8.8, "dr": 154, "lh": 0.76, "lt": 8.9, "ldr": 161, "c": 1.9, "az": 146}, {"d": "2024-12-27", "h": 0.66, "t": 12.7, "dr": 204, "lh": 0.58, "lt": 11.2, "ldr": 175, "c": 0.3, "az": 145}, {"d": "2025-02-15", "h": 1.04, "t": 12.6, "dr": 161, "lh": 0.8, "lt": 12.9, "ldr": 163, "c": 2.2, "az": 128}, {"d": "2025-05-06", "h": 0.68, "t": 8.4, "dr": 147, "lh": 0.56, "lt": 8.4, "ldr": 148, "c": 0.2, "az": 62}, {"d": "2025-06-05", "h": 1.34, "t": 11.6, "dr": 187, "lh": 1.12, "lt": 11.1, "ldr": 191, "c": 0.3, "az": 50}, {"d": "2025-07-05", "h": 0.8, "t": 10.7, "dr": 289, "lh": 0.9, "lt": 5.5, "ldr": 198, "c": 0.2, "az": 52}, {"d": "2025-07-10", "h": 0.82, "t": 14.4, "dr": 182, "lh": 0.74, "lt": 15.0, "ldr": 178, "c": 0.2, "az": 53}, {"d": "2025-07-27", "h": 1.26, "t": 11.0, "dr": 290, "lh": 0.9, "lt": 9.8, "ldr": 163, "c": 0.9, "az": 59}, {"d": "2025-08-24", "h": 1.2, "t": 14.3, "dr": 188, "lh": 1.04, "lt": 14.6, "ldr": 189, "c": 1.7, "az": 77}, {"d": "2025-09-08", "h": 0.88, "t": 9.7, "dr": 163, "lh": 0.88, "lt": 10.2, "ldr": 174, "c": 0.7, "az": 92}, {"d": "2025-09-13", "h": 1.0, "t": 14.2, "dr": 206, "lh": 0.86, "lt": 10.1, "ldr": 155, "c": 3.3, "az": 97}, {"d": "2025-10-08", "h": 0.88, "t": 12.2, "dr": 188, "lh": 0.62, "lt": 12.6, "ldr": 187, "c": 2.4, "az": 124}, {"d": "2025-10-13", "h": 0.7, "t": 11.6, "dr": 198, "lh": 0.72, "lt": 9.3, "ldr": 154, "c": 0.3, "az": 128}, {"d": "2026-01-26", "h": 0.76, "t": 10.8, "dr": 175, "lh": 0.76, "lt": 10.9, "ldr": 173, "c": 1.1, "az": 136}, {"d": "2026-03-02", "h": 0.52, "t": 13.3, "dr": 200, "lh": 0.4, "lt": 9.7, "ldr": 175, "c": 0.2, "az": 119}, {"d": "2026-03-07", "h": 0.82, "t": 10.0, "dr": 162, "lh": 0.82, "lt": 10.2, "ldr": 161, "c": 0.2, "az": 116}, {"d": "2026-03-22", "h": 0.54, "t": 13.5, "dr": 200, "lh": 0.46, "lt": 8.8, "ldr": 147, "c": 3.5, "az": 104}, {"d": "2026-04-21", "h": 0.96, "t": 10.2, "dr": 164, "lh": 0.88, "lt": 10.8, "ldr": 164, "c": 1.1, "az": 75}, {"d": "2026-04-26", "h": 1.0, "t": 11.2, "dr": 159, "lh": 0.92, "lt": 11.7, "ldr": 159, "c": 1.9, "az": 70}, {"d": "2026-05-21", "h": 0.9, "t": 10.3, "dr": 159, "lh": 0.78, "lt": 10.4, "ldr": 168, "c": 0.2, "az": 54}, {"d": "2026-06-05", "h": 1.16, "t": 9.7, "dr": 171, "lh": 0.96, "lt": 9.8, "ldr": 179, "c": 2.9, "az": 50}, {"d": "2026-06-25", "h": 0.84, "t": 13.5, "dr": 204, "lh": 0.72, "lt": 9.5, "ldr": 199, "c": 0.3, "az": 50}, {"d": "2026-07-05", "h": 0.96, "t": 9.8, "dr": 163, "lh": 0.88, "lt": 9.8, "ldr": 166, "c": 0.1, "az": 52}, {"d": "2026-07-10", "h": 1.1, "t": 14.2, "dr": 197, "lh": 0.84, "lt": 11.6, "ldr": 173, "c": 0.3, "az": 53}, {"d": "2026-08-19", "h": 2.0, "t": 16.9, "dr": 197, "lh": 1.48, "lt": 17.2, "ldr": 192, "c": 0.4, "az": 73}, {"d": "2026-08-31", "h": 1.48, "t": 17.1, "dr": 207, "lh": 0.96, "lt": 17.5, "ldr": 198, "c": 0.6, "az": 84}]}</script>
+<script>
+document.querySelectorAll(".day").forEach(function(b){
+ b.setAttribute("aria-expanded","false");
+ b.addEventListener("click",function(){
+  var open=b.getAttribute("aria-expanded")==="true";
+  document.querySelectorAll(".day").forEach(function(o){o.setAttribute("aria-expanded","false")});
+  b.setAttribute("aria-expanded",open?"false":"true");
+  if(open)return;
+  var el=document.getElementById("f"+b.dataset.analog.replace(/-/g,""));
+  if(el)el.scrollIntoView({behavior:"smooth",block:"start"});
+ });
+});
+</script>
