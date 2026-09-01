@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Arugam swell window - fetch forecast, match a satellite frame to each day, render site/.
 Standard library only. No API keys."""
-import json, math, base64, os, sys, time, urllib.request, urllib.parse
+import json, math, os, sys, time, urllib.request, urllib.parse
 from datetime import datetime, timedelta, timezone
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
@@ -76,7 +76,7 @@ def match(day, frames):
 
 
 HE_DOW = ("ב׳", "ג׳", "ד׳", "ה׳", "ו׳", "ש׳", "א׳")   # Python weekday(): Mon=0 .. Sun=6
-FRAME_IMAGES = {"2026-08-31", "2026-08-19", "2024-08-09"}
+HE_FULL = ("שני", "שלישי", "רביעי", "חמישי", "שישי", "שבת", "ראשון")
 
 
 def chip(p):
@@ -93,7 +93,7 @@ def row(d):
     else:
         ecm, solo = "WW3 בלבד — אין הצלבה", " solo"
     off = " off" if 200 <= d["wd"] <= 300 else ""
-    link = " has-frame" if d["an"] in FRAME_IMAGES else ""
+    link = " has-frame" if d.get("img") else ""
     return (
         f'<button class="day {cls}{link}" data-analog="{d["an"]}">'
         f'<span class="d-when"><b>{d["dow"]}</b><i dir="ltr">{d["dm"]}</i></span>'
@@ -106,6 +106,50 @@ def row(d):
         f'<span class="d-meta"><span class="cmp{solo}" dir="ltr">{ecm}</span>'
         f'<span class="cmp" dir="ltr">+{d["lead"]}d</span>'
         f'<span class="cmp" dir="ltr">&asymp; {d["an"]}</span></span></button>')
+
+
+def hero_html(d, frames_by_date, today):
+    cls, lab = chip(d["pct"])
+    when = "הבוקר" if d["date"] == today else ("מחר בבוקר" if d["lead"] == 1 else f'בעוד {d["lead"]} ימים')
+    f = frames_by_date[d["an"]]
+    if d["eh"] is not None:
+        cross = (f'<span class="cmp" dir="ltr">WW3 {d["h"]:.2f}m / {d["t"]:.1f}s</span>'
+                 f'<span class="cmp" dir="ltr">ECMWF {d["eh"]:.2f}m / {d["et"]:.1f}s</span>')
+    else:
+        cross = ('<span class="cmp" dir="ltr">WW3 %.2fm / %.1fs</span>'
+                 '<span class="cmp solo">מודל אחד בלבד — אין הצלבה</span>') % (d["h"], d["t"])
+    img = (f'<img src="img/{d["an"]}.jpg" alt="Sentinel-2, ארוגם ביי, {d["an"]}">'
+           if d.get("img") else
+           '<p class="h-none">הפריים התואם לא נרנדר בריצה הזאת.</p>')
+    return f'''<div class="hero {cls}">
+<div class="h-top"><p class="h-lab">{when} · {lab}</p>
+<h2 class="h-day">{HE_FULL[datetime.strptime(d["date"],"%Y-%m-%d").weekday()]}<small>{d["dm"]}</small></h2></div>
+<div class="h-nums">
+<div class="h-n"><b>{d["h"]:.2f}</b><i>גובה (מ׳)</i></div>
+<div class="h-n per"><b>{d["t"]:.1f}</b><i>מחזור (ש׳)</i></div>
+<div class="h-n"><b>{d["dr"]:.0f}&deg;</b><i>כיוון</i></div>
+<div class="h-n"><b>{d["ws"]:.0f}</b><i>רוח (kn)</i></div>
+<div class="h-n"><b>{d["pct"]}</b><i>אחוזון</i></div>
+</div>
+<div class="h-cross">{cross}</div>
+{img}
+<p class="h-cap">היום הדומה ביותר בארכיון: <b>{d["an"]}</b> — {f["h"]:.2f}מ׳ @ {f["t"]:.1f}ש׳ מ-{f["dr"]:.0f}&deg;, עננות {f["c"]}%. מרחק התאמה {d["dist"]:.2f}.</p>
+</div>'''
+
+
+def frames_html(days, frames_by_date):
+    seen, out = set(), []
+    for d in days:
+        if d["an"] in seen or not d.get("img"):
+            continue
+        seen.add(d["an"])
+        f = frames_by_date[d["an"]]
+        used = [x["dm"] for x in days if x["an"] == d["an"]]
+        out.append(f'''<figure class="frame" id="f{d["an"]}">
+<div class="f-head"><h3>{d["an"]}</h3><code dir="ltr">{f["h"]:.2f}m @ {f["t"]:.1f}s &middot; {f["dr"]:.0f}&deg;</code></div>
+<img src="img/{d["an"]}.jpg" alt="Sentinel-2, ארוגם ביי, {d["an"]}" loading="lazy">
+<figcaption>האנלוג של {", ".join(used)}. עננות מעל החוף {f["c"]}%.</figcaption></figure>''')
+    return "".join(out)
 
 
 def main():
@@ -144,30 +188,61 @@ def main():
                    eh=g(ecmwf, "swell_wave_height"), et=g(ecmwf, "swell_wave_period"),
                    dow=HE_DOW[dd.weekday()], dm=dd.strftime("%d %b"),
                    lead=(dd - today).days)
-        best, _ = match(rec, frames)
-        rec["an"] = best["d"]
+        best, bd = match(rec, frames)
+        rec["an"], rec["dist"], rec["date"] = best["d"], bd, day
         days.append(rec)
 
     if not days:
         raise SystemExit("FATAL: forecast produced no usable days")
 
+    frames_by_date = {f["d"]: f for f in frames}
+
+    # the hero is the next morning still ahead of us: today before 10:00, else tomorrow
+    now = datetime.now(LKT)
+    today = now.strftime("%Y-%m-%d")
+    upcoming = [d for d in days if d["date"] > today or (d["date"] == today and now.hour < 10)]
+    hero = upcoming[0] if upcoming else days[0]
+
+    # render only the frames actually referenced, hero first so it is never the one that fails
+    os.makedirs(os.path.join(OUT, "img"), exist_ok=True)
+    wanted, rendered = [hero["an"]] + [d["an"] for d in days], {}
+    try:
+        import render as _render
+    except Exception as e:
+        print("WARN: renderer unavailable:", e); _render = None
+    for date in dict.fromkeys(wanted):
+        if _render is None:
+            break
+        dest = os.path.join(OUT, "img", date + ".jpg")
+        if os.path.exists(dest) and os.path.getsize(dest) > 10000:
+            rendered[date] = True
+            print(f"  cached   {date}", flush=True)
+            continue
+        try:
+            t0 = time.time()
+            _render.frame(frames_by_date[date]["id"], dest)
+            rendered[date] = True
+            print(f"  rendered {date} in {time.time()-t0:.0f}s", flush=True)
+        except Exception as e:
+            print(f"  WARN {date}: {e}", flush=True)
+    for d in days:
+        d["img"] = d["an"] in rendered
+    hero["img"] = hero["an"] in rendered
+
     stamp = datetime.now(LKT).strftime("%d %b %Y %H:%M")
     html = open(os.path.join(ROOT, "template.html"), encoding="utf-8").read()
     html = html.replace("{{STAMP}}", f'<p class="stamp">updated {stamp} LKT</p>')
     html = html.replace("{{ROWS}}", '<div class="days">' + "".join(row(d) for d in days) + '</div>')
+    html = html.replace("{{HERO}}", hero_html(hero, frames_by_date, today))
+    html = html.replace("{{FRAMES}}", frames_html(days, frames_by_date))
 
-    os.makedirs(os.path.join(OUT, "img"), exist_ok=True)
     open(os.path.join(OUT, "index.html"), "w", encoding="utf-8").write(html)
-    for name in os.listdir(ROOT):
-        if name.endswith(".b64"):
-            raw = base64.b64decode("".join(
-                open(os.path.join(ROOT, name), encoding="ascii").read().split()))
-            open(os.path.join(OUT, "img", name[:-4] + ".jpg"), "wb").write(raw)
     open(os.path.join(OUT, ".nojekyll"), "w").close()
 
     peak = max(days, key=lambda d: d["pct"])
-    print(f"{len(days)} days | peak {peak['dm']} {peak['h']:.2f}m {peak['t']:.1f}s "
-          f"{peak['dr']:.0f}deg p{peak['pct']} | analog {peak['an']}")
+    print(f"{len(days)} days | {len(rendered)} frames rendered | "
+          f"hero {hero['dm']} p{hero['pct']} -> {hero['an']} (d={hero['dist']:.2f}) | "
+          f"peak {peak['dm']} {peak['h']:.2f}m {peak['t']:.1f}s p{peak['pct']}")
 
 
 if __name__ == "__main__":
